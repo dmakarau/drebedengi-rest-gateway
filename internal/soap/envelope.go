@@ -3,6 +3,7 @@ package soap
 import (
 	"encoding/xml"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -23,6 +24,19 @@ type Fault struct {
 
 func (f *Fault) Error() string {
 	return fmt.Sprintf("SOAP Fault [%s]: %s", f.Code, f.String)
+}
+
+// HTTPStatus maps the SOAP fault code to an appropriate HTTP status code.
+func (f *Fault) HTTPStatus() int {
+	code := strings.ToLower(f.Code)
+	msg := strings.ToLower(f.String)
+	if strings.Contains(code, "client") {
+		if strings.Contains(msg, "access") || strings.Contains(msg, "denied") || strings.Contains(msg, "auth") {
+			return http.StatusUnauthorized
+		}
+		return http.StatusBadRequest
+	}
+	return http.StatusBadGateway
 }
 
 // BuildEnvelope constructs the full SOAP XML request for a given method and parameters.

@@ -1,6 +1,7 @@
 package soap
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -159,5 +160,29 @@ func TestFault_Error(t *testing.T) {
 	want := "SOAP Fault [Server]: internal error"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestFault_HTTPStatus(t *testing.T) {
+	tests := []struct {
+		name     string
+		code     string
+		msg      string
+		wantCode int
+	}{
+		{"client auth error", "SOAP-ENV:Client", "Access denied", http.StatusUnauthorized},
+		{"client denied error", "Client", "permission denied for user", http.StatusUnauthorized},
+		{"client bad input", "SOAP-ENV:Client", "invalid parameter value", http.StatusBadRequest},
+		{"server error", "SOAP-ENV:Server", "internal server error", http.StatusBadGateway},
+		{"unknown error", "Unknown", "something went wrong", http.StatusBadGateway},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := &Fault{Code: tt.code, String: tt.msg}
+			got := f.HTTPStatus()
+			if got != tt.wantCode {
+				t.Errorf("HTTPStatus() = %d, want %d", got, tt.wantCode)
+			}
+		})
 	}
 }
