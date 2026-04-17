@@ -65,10 +65,10 @@ HTTP request → chi router → Handler → soap.Account function → soap.Clien
 
 ### Key interfaces and patterns
 
-- `soap.Caller` interface (`internal/soap/caller.go`) — the only dependency handlers take on the SOAP layer. Enables handler unit tests via `mockCaller` without hitting the network.
+- `soap.Caller` interface (`internal/soap/caller.go`) — accepts `context.Context` as first param; the only dependency handlers take on the SOAP layer. Enables handler unit tests via `mockCaller` without hitting the network.
 - `soap.Param` — typed parameter passed to `BuildEnvelope`. The `Value any` field drives encoding dispatch in `encodeParam`.
-- Every SOAP wrapper function in `internal/soap/account.go` follows the same pattern: call `c.Call(method, authParams(...))`, unmarshal the raw body XML into a typed response struct from `types_account.go`.
-- Handlers return `502 Bad Gateway` on SOAP errors; the error message is included in the JSON body under `"error"`.
+- Every SOAP wrapper function in `internal/soap/account.go` follows the pattern: `func GetXxx(ctx context.Context, c Caller) (T, error)` — auth params are prepended automatically by `Client.Call`, so wrappers pass `nil` for non-auth params.
+- SOAP errors are mapped to HTTP status by `soap.Fault.HTTPStatus()`: Client+auth faults → 401, other Client faults → 400, Server faults → 502. The `soapErr` helper in `handlers.go` does the type assertion.
 
 ### Adding a new endpoint
 
@@ -81,8 +81,8 @@ HTTP request → chi router → Handler → soap.Account function → soap.Clien
 
 **Error handling**
 - Wrap errors with `%w` (not `%v`) whenever the caller might inspect the type or unwrap it
-- Use `http.NewRequestWithContext(r.Context(), ...)` in handlers, not `http.NewRequest`
-- Check all `error` returns — `json.NewEncoder(w).Encode(v)` errors are silently swallowed in the current `respond` package; acceptable for now but don't add new silent drops
+- Pass `r.Context()` to all SOAP wrapper functions; `Client.Call` forwards it to `http.NewRequestWithContext`
+- Check all `error` returns; `respond.JSON` logs encode errors but cannot change the status code after `WriteHeader` was called
 
 **Naming**
 - SOAP wrapper functions are exported and named after the SOAP method (`GetAccessStatus`, not `FetchStatus`)
