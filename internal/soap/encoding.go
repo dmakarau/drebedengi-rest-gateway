@@ -24,6 +24,8 @@ func encodeParam(p Param) string {
 			val = "true"
 		}
 		return encodeSimple(p.Name, "xsd:boolean", val)
+	case float64:
+		return encodeSimple(p.Name, "xsd:float", fmt.Sprintf("%g", v))
 	case map[string]any:
 		return encodeMap(p.Name, v)
 	case []map[string]any:
