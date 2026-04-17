@@ -33,9 +33,14 @@ Work in progress. The following endpoints are implemented and tested against the
 | GET | `/api/v1/account/access` | Access level (0 = full, 1 = limited) |
 | GET | `/api/v1/account/userid` | Internal user ID for the configured login |
 
+### Balance
+
+| Method | Path | Query params | Description |
+|--------|------|-------------|-------------|
+| GET | `/api/v1/balance` | `rest_date`, `with_accum`, `with_duty` | Account balances grouped by place/currency. Sums in decimal (e.g. `10.50`). |
+
 ### Planned
 
-- Balance (grouped by place/currency)
 - Records (expenses, incomes, moves, currency changes) with filtering
 - Categories, Sources, Places, Currencies, Tags -- full CRUD
 - Change log (sync support via revision tracking)

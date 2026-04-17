@@ -27,6 +27,8 @@ func NewRouter(h *Handler) chi.Router {
 		r.Get("/userid", h.GetUserIdByLogin)
 	})
 
+	r.Get("/balance", h.GetBalance)
+
 	return r
 }
 

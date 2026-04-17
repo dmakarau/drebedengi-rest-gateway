@@ -67,7 +67,8 @@ HTTP request → chi router → Handler → soap.Account function → soap.Clien
 
 - `soap.Caller` interface (`internal/soap/caller.go`) — accepts `context.Context` as first param; the only dependency handlers take on the SOAP layer. Enables handler unit tests via `mockCaller` without hitting the network.
 - `soap.Param` — typed parameter passed to `BuildEnvelope`. The `Value any` field drives encoding dispatch in `encodeParam`.
-- Every SOAP wrapper function in `internal/soap/account.go` follows the pattern: `func GetXxx(ctx context.Context, c Caller) (T, error)` — auth params are prepended automatically by `Client.Call`, so wrappers pass `nil` for non-auth params.
+- Every SOAP wrapper function follows the pattern: `func GetXxx(ctx context.Context, c Caller) (T, error)` — auth params are prepended automatically by `Client.Call`, so wrappers pass `nil` for non-auth params.
+- Responses that return an `ns2:Map` array (e.g. `getBalance`) cannot be unmarshalled directly into typed structs because `encoding/xml` doesn't support attribute-driven dispatch. Instead, unmarshal into `[]balanceMapEntry` (generic key-value pairs) and switch on `kv.Key` to populate a typed struct. See `internal/soap/balance.go` for the pattern.
 - SOAP errors are mapped to HTTP status by `soap.Fault.HTTPStatus()`: Client+auth faults → 401, other Client faults → 400, Server faults → 502. The `soapErr` helper in `handlers.go` does the type assertion.
 
 ### Adding a new endpoint
