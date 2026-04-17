@@ -1,0 +1,15 @@
+#!/bin/sh
+# Strip AI/assistant attribution automatically on every commit
+COMMIT_MSG_FILE="$1"
+
+sed -i.bak \
+  -e '/^Co-Authored-By: Claude/d' \
+  -e '/^Co-authored-by: Claude/d' \
+  -e '/^🤖 Generated with \[Claude Code\]/d' \
+  -e '/^Co-Authored-By: assistant/Id' \
+  "$COMMIT_MSG_FILE"
+
+# Remove trailing blank lines left after stripping
+perl -i.bak -0pe 's/\n+$/\n/' "$COMMIT_MSG_FILE"
+
+rm -f "${COMMIT_MSG_FILE}.bak"

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build ./...)",
+      "Bash(go test ./...)",
+      "Bash(go test -run *)",
+      "Bash(go test ./... -run *)",
+      "Bash(go vet ./...)",
+      "Bash(go mod tidy)",
+      "Bash(go mod verify)",
+      "Bash(go tool cover *)",
+      "Bash(golangci-lint run*)",
+      "Bash(make *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git add *)",
+      "Bash(git stash list)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -q \"git commit\" && echo \"$CMD\" | grep -qiE \"Co-Authored-By: Claude|Generated with.*Claude\"; then echo \"Remove Co-Authored-By and AI attribution from commit message\" >&2; exit 2; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
