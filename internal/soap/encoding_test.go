@@ -147,6 +147,22 @@ func TestXmlEscape(t *testing.T) {
 	}
 }
 
+func TestEncodeParam_Float64(t *testing.T) {
+	got := encodeParam(Param{Name: "amount", Value: float64(3.14)})
+	want := `<amount xsi:type="xsd:float">3.14</amount>`
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestEncodeParam_UnknownType(t *testing.T) {
+	// Unknown types fall through to xsd:string via fmt.Sprintf.
+	got := encodeParam(Param{Name: "x", Value: struct{ V int }{V: 7}})
+	if !strings.Contains(got, `xsi:type="xsd:string"`) {
+		t.Errorf("expected xsd:string fallback, got: %s", got)
+	}
+}
+
 func TestEncodeMapValue_AllTypes(t *testing.T) {
 	tests := []struct {
 		name string
