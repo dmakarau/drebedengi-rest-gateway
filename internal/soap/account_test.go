@@ -1,6 +1,7 @@
 package soap
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
@@ -14,7 +15,7 @@ type mockCaller struct {
 	params []Param
 }
 
-func (m *mockCaller) Call(method string, params []Param) ([]byte, error) {
+func (m *mockCaller) Call(_ context.Context, method string, params []Param) ([]byte, error) {
 	m.method = method
 	m.params = params
 	return m.response, m.err
@@ -25,7 +26,7 @@ func TestGetAccessStatus_Success(t *testing.T) {
 		response: []byte(`<getAccessStatusResponse><getAccessStatusReturn>1</getAccessStatusReturn></getAccessStatusResponse>`),
 	}
 
-	status, err := GetAccessStatus(mock, "api", "login", "pass")
+	status, err := GetAccessStatus(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +41,7 @@ func TestGetAccessStatus_Success(t *testing.T) {
 func TestGetAccessStatus_CallError(t *testing.T) {
 	mock := &mockCaller{err: fmt.Errorf("connection refused")}
 
-	_, err := GetAccessStatus(mock, "api", "login", "pass")
+	_, err := GetAccessStatus(context.Background(), mock)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -49,7 +50,7 @@ func TestGetAccessStatus_CallError(t *testing.T) {
 func TestGetAccessStatus_BadXML(t *testing.T) {
 	mock := &mockCaller{response: []byte(`not valid xml`)}
 
-	_, err := GetAccessStatus(mock, "api", "login", "pass")
+	_, err := GetAccessStatus(context.Background(), mock)
 	if err == nil {
 		t.Fatal("expected error for bad XML")
 	}
@@ -60,7 +61,7 @@ func TestGetCurrentRevision_Success(t *testing.T) {
 		response: []byte(`<getCurrentRevisionResponse><getCurrentRevisionReturn>99999</getCurrentRevisionReturn></getCurrentRevisionResponse>`),
 	}
 
-	rev, err := GetCurrentRevision(mock, "api", "login", "pass")
+	rev, err := GetCurrentRevision(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func TestGetExpireDate_Success(t *testing.T) {
 		response: []byte(`<getExpireDateResponse><getExpireDateReturn>2037-01-02</getExpireDateReturn></getExpireDateResponse>`),
 	}
 
-	date, err := GetExpireDate(mock, "api", "login", "pass")
+	date, err := GetExpireDate(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +89,7 @@ func TestGetSubscriptionStatus_Success(t *testing.T) {
 		response: []byte(`<getSubscriptionStatusResponse><getSubscriptionStatusReturn>1</getSubscriptionStatusReturn></getSubscriptionStatusResponse>`),
 	}
 
-	status, err := GetSubscriptionStatus(mock, "api", "login", "pass")
+	status, err := GetSubscriptionStatus(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +103,7 @@ func TestGetRightAccess_Success(t *testing.T) {
 		response: []byte(`<getRightAccessResponse><getRightAccessReturn>0</getRightAccessReturn></getRightAccessResponse>`),
 	}
 
-	access, err := GetRightAccess(mock, "api", "login", "pass")
+	access, err := GetRightAccess(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,27 +117,11 @@ func TestGetUserIdByLogin_Success(t *testing.T) {
 		response: []byte(`<getUserIdByLoginResponse><getUserIdByLoginReturn>1000000000539</getUserIdByLoginReturn></getUserIdByLoginResponse>`),
 	}
 
-	uid, err := GetUserIdByLogin(mock, "api", "login", "pass")
+	uid, err := GetUserIdByLogin(context.Background(), mock)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if uid != "1000000000539" {
 		t.Errorf("uid = %q, want %q", uid, "1000000000539")
-	}
-}
-
-func TestAuthParams(t *testing.T) {
-	params := authParams("myapi", "mylogin", "mypass")
-	if len(params) != 3 {
-		t.Fatalf("len = %d, want 3", len(params))
-	}
-	if params[0].Name != "apiId" || params[0].Value != "myapi" {
-		t.Errorf("params[0] = %+v", params[0])
-	}
-	if params[1].Name != "login" || params[1].Value != "mylogin" {
-		t.Errorf("params[1] = %+v", params[1])
-	}
-	if params[2].Name != "pass" || params[2].Value != "mypass" {
-		t.Errorf("params[2] = %+v", params[2])
 	}
 }

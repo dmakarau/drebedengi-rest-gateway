@@ -1,21 +1,13 @@
 package soap
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 )
 
-// authParams returns the standard 3 auth params for every API call.
-func authParams(apiId, login, pass string) []Param {
-	return []Param{
-		{Name: "apiId", Value: apiId},
-		{Name: "login", Value: login},
-		{Name: "pass", Value: pass},
-	}
-}
-
-func GetAccessStatus(c Caller, apiId, login, pass string) (int, error) {
-	body, err := c.Call("getAccessStatus", authParams(apiId, login, pass))
+func GetAccessStatus(ctx context.Context, c Caller) (int, error) {
+	body, err := c.Call(ctx, "getAccessStatus", nil)
 	if err != nil {
 		return 0, err
 	}
@@ -26,8 +18,8 @@ func GetAccessStatus(c Caller, apiId, login, pass string) (int, error) {
 	return resp.Return, nil
 }
 
-func GetCurrentRevision(c Caller, apiId, login, pass string) (int, error) {
-	body, err := c.Call("getCurrentRevision", authParams(apiId, login, pass))
+func GetCurrentRevision(ctx context.Context, c Caller) (int, error) {
+	body, err := c.Call(ctx, "getCurrentRevision", nil)
 	if err != nil {
 		return 0, err
 	}
@@ -38,8 +30,8 @@ func GetCurrentRevision(c Caller, apiId, login, pass string) (int, error) {
 	return resp.Return, nil
 }
 
-func GetExpireDate(c Caller, apiId, login, pass string) (string, error) {
-	body, err := c.Call("getExpireDate", authParams(apiId, login, pass))
+func GetExpireDate(ctx context.Context, c Caller) (string, error) {
+	body, err := c.Call(ctx, "getExpireDate", nil)
 	if err != nil {
 		return "", err
 	}
@@ -50,8 +42,8 @@ func GetExpireDate(c Caller, apiId, login, pass string) (string, error) {
 	return resp.Return, nil
 }
 
-func GetSubscriptionStatus(c Caller, apiId, login, pass string) (string, error) {
-	body, err := c.Call("getSubscriptionStatus", authParams(apiId, login, pass))
+func GetSubscriptionStatus(ctx context.Context, c Caller) (string, error) {
+	body, err := c.Call(ctx, "getSubscriptionStatus", nil)
 	if err != nil {
 		return "", err
 	}
@@ -62,8 +54,8 @@ func GetSubscriptionStatus(c Caller, apiId, login, pass string) (string, error) 
 	return resp.Return, nil
 }
 
-func GetRightAccess(c Caller, apiId, login, pass string) (string, error) {
-	body, err := c.Call("getRightAccess", authParams(apiId, login, pass))
+func GetRightAccess(ctx context.Context, c Caller) (string, error) {
+	body, err := c.Call(ctx, "getRightAccess", nil)
 	if err != nil {
 		return "", err
 	}
@@ -74,8 +66,8 @@ func GetRightAccess(c Caller, apiId, login, pass string) (string, error) {
 	return resp.Return, nil
 }
 
-func GetUserIdByLogin(c Caller, apiId, login, pass string) (string, error) {
-	body, err := c.Call("getUserIdByLogin", authParams(apiId, login, pass))
+func GetUserIdByLogin(ctx context.Context, c Caller) (string, error) {
+	body, err := c.Call(ctx, "getUserIdByLogin", nil)
 	if err != nil {
 		return "", err
 	}

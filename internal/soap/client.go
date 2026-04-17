@@ -2,6 +2,7 @@ package soap
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,31 +12,42 @@ import (
 // Client holds credentials and HTTP transport for calling the drebedengi SOAP API.
 // It implements the Caller interface.
 type Client struct {
-	APIId    string
-	Login    string
-	Password string
+	apiId    string
+	login    string
+	password string
 	URL      string
 	http     *http.Client
 }
 
 func NewClient(apiId, login, password, url string) *Client {
 	return &Client{
-		APIId:    apiId,
-		Login:    login,
-		Password: password,
+		apiId:    apiId,
+		login:    login,
+		password: password,
 		URL:      url,
 		http:     &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
+func (c *Client) authParams() []Param {
+	return []Param{
+		{Name: "apiId", Value: c.apiId},
+		{Name: "login", Value: c.login},
+		{Name: "pass", Value: c.password},
+	}
+}
+
 // Call sends a SOAP request for the given method and returns the inner Body XML.
-func (c *Client) Call(method string, params []Param) ([]byte, error) {
-	envelope, err := BuildEnvelope(method, params)
+// Auth params are prepended automatically.
+func (c *Client) Call(ctx context.Context, method string, params []Param) ([]byte, error) {
+	all := append(c.authParams(), params...)
+
+	envelope, err := BuildEnvelope(method, all)
 	if err != nil {
 		return nil, fmt.Errorf("building envelope: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.URL, bytes.NewReader(envelope))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bytes.NewReader(envelope))
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
