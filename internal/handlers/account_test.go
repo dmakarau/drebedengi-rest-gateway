@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,16 +17,13 @@ type mockCaller struct {
 	err      error
 }
 
-func (m *mockCaller) Call(method string, params []soap.Param) ([]byte, error) {
+func (m *mockCaller) Call(_ context.Context, _ string, _ []soap.Param) ([]byte, error) {
 	return m.response, m.err
 }
 
 func newTestHandler(response []byte, err error) *Handler {
 	return &Handler{
-		SOAP:     &mockCaller{response: response, err: err},
-		APIId:    "test_api",
-		Login:    "test@example.com",
-		Password: "test",
+		SOAP: &mockCaller{response: response, err: err},
 	}
 }
 
@@ -50,8 +48,38 @@ func TestGetAccessStatus_OK(t *testing.T) {
 	}
 }
 
-func TestGetAccessStatus_SOAPError(t *testing.T) {
-	h := newTestHandler(nil, fmt.Errorf("SOAP Fault [Client]: access denied"))
+func TestGetAccessStatus_SOAPFault_Auth(t *testing.T) {
+	h := newTestHandler(nil, &soap.Fault{Code: "SOAP-ENV:Client", String: "Access denied"})
+
+	req := httptest.NewRequest(http.MethodGet, "/account/status", nil)
+	w := httptest.NewRecorder()
+	h.GetAccessStatus(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusUnauthorized)
+	}
+
+	var body map[string]string
+	json.Unmarshal(w.Body.Bytes(), &body)
+	if body["error"] == "" {
+		t.Error("expected error message in body")
+	}
+}
+
+func TestGetAccessStatus_SOAPFault_BadInput(t *testing.T) {
+	h := newTestHandler(nil, &soap.Fault{Code: "SOAP-ENV:Client", String: "invalid parameter"})
+
+	req := httptest.NewRequest(http.MethodGet, "/account/status", nil)
+	w := httptest.NewRecorder()
+	h.GetAccessStatus(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestGetAccessStatus_NetworkError(t *testing.T) {
+	h := newTestHandler(nil, fmt.Errorf("connection timeout"))
 
 	req := httptest.NewRequest(http.MethodGet, "/account/status", nil)
 	w := httptest.NewRecorder()
@@ -161,8 +189,8 @@ func TestGetUserIdByLogin_OK(t *testing.T) {
 	}
 }
 
-func TestGetUserIdByLogin_SOAPError(t *testing.T) {
-	h := newTestHandler(nil, fmt.Errorf("connection timeout"))
+func TestGetUserIdByLogin_SOAPFault_Server(t *testing.T) {
+	h := newTestHandler(nil, &soap.Fault{Code: "SOAP-ENV:Server", String: "internal error"})
 
 	req := httptest.NewRequest(http.MethodGet, "/account/userid", nil)
 	w := httptest.NewRecorder()

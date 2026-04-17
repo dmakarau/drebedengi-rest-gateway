@@ -17,13 +17,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	soapClient := soap.NewClient(cfg.APIId, cfg.Login, cfg.Password, cfg.SoapURL)
-
 	h := &handlers.Handler{
-		SOAP:     soapClient,
-		APIId:    cfg.APIId,
-		Login:    cfg.Login,
-		Password: cfg.Password,
+		SOAP: soap.NewClient(cfg.APIId, cfg.Login, cfg.Password, cfg.SoapURL),
 	}
 
 	r := chi.NewRouter()
