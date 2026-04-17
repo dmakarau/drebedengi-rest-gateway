@@ -1,5 +1,12 @@
 # drebedengi-rest
 
+![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
+![Chi](https://img.shields.io/badge/Chi-v5-purple)
+![SOAP](https://img.shields.io/badge/SOAP-XML-orange)
+![REST](https://img.shields.io/badge/REST-JSON-green)
+![Status](https://img.shields.io/badge/Status-WIP-yellow)
+![Purpose](https://img.shields.io/badge/Purpose-Personal_Project-blue)
+
 A REST/JSON gateway for the [drebedengi.ru](https://www.drebedengi.ru) personal finance service. Drebedengi exposes a SOAP/XML API; this project wraps it in a clean HTTP+JSON interface suitable for mobile apps, scripts, or anything that would rather not deal with SOAP.
 
 Written in Go. No external SOAP libraries -- requests are built with `strings.Builder`, responses are parsed with `encoding/xml`.
