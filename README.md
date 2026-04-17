@@ -4,6 +4,7 @@
 ![Chi](https://img.shields.io/badge/Chi-v5-purple)
 ![SOAP](https://img.shields.io/badge/SOAP-XML-orange)
 ![REST](https://img.shields.io/badge/REST-JSON-green)
+![CI](https://github.com/dmakarau/drebedengi-rest-gateway/actions/workflows/ci.yml/badge.svg)
 ![Status](https://img.shields.io/badge/Status-WIP-yellow)
 ![Purpose](https://img.shields.io/badge/Purpose-Personal_Project-blue)
 
@@ -40,8 +41,6 @@ Work in progress. The following endpoints are implemented and tested against the
 - Change log (sync support via revision tracking)
 - Purchases/accumulators, checks
 
-See [PLAN.md](PLAN.md) for the full implementation roadmap.
-
 ## Getting started
 
 ### Prerequisites
@@ -55,7 +54,7 @@ See [PLAN.md](PLAN.md) for the full implementation roadmap.
 Clone the repo and copy the example environment file:
 
 ```sh
-git clone https://github.com/youruser/drebedengi-rest.git
+git clone https://github.com/dmakarau/drebedengi-rest-gateway.git
 cd drebedengi-rest
 cp .env.example .env
 ```
@@ -95,6 +94,14 @@ curl http://localhost:8080/api/v1/account/status
 curl http://localhost:8080/api/v1/account/revision
 # {"revision":1234908678}
 ```
+
+### Run tests
+
+```sh
+make test
+```
+
+Tests run automatically on every push and PR via GitHub Actions.
 
 ### Build
 
