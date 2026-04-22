@@ -14,13 +14,23 @@ type BalanceItem struct {
 }
 
 func GetBalance(ctx context.Context, c Caller, restDate string, isWithAccum, isWithDuty bool) ([]BalanceItem, error) {
-	body, err := c.Call(ctx, "getBalance", []Param{
-		{Name: "params", Value: map[string]any{
-			"rest_date":     restDate,
-			"is_with_accum": isWithAccum,
-			"is_with_duty":  isWithDuty,
-		}},
-	})
+	params := map[string]any{}
+	if restDate != "" {
+		params["rest_date"] = restDate
+	}
+	if isWithAccum {
+		params["is_with_accum"] = isWithAccum
+	}
+	if isWithDuty {
+		params["is_with_duty"] = isWithDuty
+	}
+
+	var soapParams []Param
+	if len(params) > 0 {
+		soapParams = []Param{{Name: "params", Value: params}}
+	}
+
+	body, err := c.Call(ctx, "getBalance", soapParams)
 	if err != nil {
 		return nil, err
 	}
