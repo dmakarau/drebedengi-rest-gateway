@@ -98,6 +98,12 @@ curl http://localhost:8080/api/v1/account/status
 
 curl http://localhost:8080/api/v1/account/revision
 # {"revision":1234908678}
+
+curl http://localhost:8080/api/v1/balance
+# [{"place_id":12345,"currency_id":643,"sum":1250.50}]
+
+curl "http://localhost:8080/api/v1/balance?rest_date=2026-01-01&with_accum=true"
+# balances as of 2026-01-01, including accumulator accounts
 ```
 
 ### Run tests
@@ -141,11 +147,15 @@ internal/
         encoding.go              Value encoding (simple types, ns2:Map, SOAP-ENC:Array)
         account.go               Account-related SOAP method wrappers
         types_account.go         XML response structs for account methods
+        balance.go               Balance SOAP method wrapper
+        types_balance.go         XML response structs for balance
     handlers/
         handlers.go              Handler struct, router wiring
         account.go               Account HTTP handlers
+        balance.go               Balance HTTP handler
     models/
-        models.go                JSON response structs
+        models.go                JSON response structs (account)
+        balance.go               Balance JSON response struct
 ```
 
 ## How it works
