@@ -95,12 +95,9 @@ HTTP request → chi router → Handler → soap.Account function → soap.Clien
 - SOAP package tests (`envelope_test.go`, `encoding_test.go`) test XML output as strings; use `strings.Contains` for targeted assertions rather than full string equality when the surrounding envelope is not under test
 - Prefer table-driven tests (`[]struct{ name, input, want }`) when there are three or more similar cases
 
-**Commit messages**
-- Format: `<type>(<scope>): <description>` — max 72 chars, imperative mood, lowercase after colon
-- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `ci`, `chore`
-- Scope = package name when the change is confined to one package
-- No period at end; no "Co-Authored-By"; no AI attribution
-- Use `/commit` command to draft and create commits
+**Git, commits and PRs**
+
+@.claude/rules/git.md
 
 ### Drebedengi API notes
 
